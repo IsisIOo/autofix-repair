@@ -1,4 +1,4 @@
-package com.example.autofixrepair.config;
+package com.example.autofixrepairlist.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

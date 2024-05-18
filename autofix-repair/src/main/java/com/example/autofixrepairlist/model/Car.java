@@ -1,4 +1,4 @@
-package com.example.autofixrepair.model;
+package com.example.autofixrepairlist.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

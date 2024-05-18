@@ -1,6 +1,6 @@
-package com.example.autofixrepair.repository;
+package com.example.autofixrepairlist.repository;
 
-import com.example.autofixrepair.entity.Repair;
+import com.example.autofixrepairlist.entity.Repair;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

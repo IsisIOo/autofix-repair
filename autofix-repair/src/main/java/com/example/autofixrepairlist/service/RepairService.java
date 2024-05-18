@@ -1,8 +1,8 @@
-package com.example.autofixrepair.service;
+package com.example.autofixrepairlist.service;
 
-import com.example.autofixrepair.entity.Repair;
-import com.example.autofixrepair.model.Car;
-import com.example.autofixrepair.repository.RepairRepository;
+import com.example.autofixrepairlist.entity.Repair;
+import com.example.autofixrepairlist.model.Car;
+import com.example.autofixrepairlist.repository.RepairRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -43,12 +43,20 @@ public class RepairService {
 
     }
 
+                    //---------------MICROSERVICIOS-------------------
 
+//REALIZA LA FUNCION OBTENER UN AUTO DE ACUERDO A UNA PATENTE ESPCIFICA, RETORNA SOLO UN AUTO
     public Car getCar(String patent) {
         Car car = restTemplate.getForObject("http://localhost:8001/car/" + patent, Car.class);
         return car;
     }
 
+
+
+
+
+
+    //---------------------------CALCULO DE COSTOS----------------------------------------
 
     //costo total sin descuentos!!!!!
     //desde aqui se recibe por entrada el repository de record
@@ -56,7 +64,7 @@ public class RepairService {
         double total_price = 0;
         String motor = getCar(rec.getPatent()).getMotorType();
         System.out.println(motor); //funciona y entrega diesel
-        String repairtype = rec.getRepairType();
+        String repairtype = rec.getRepairType(); //se debe recuperar de otra parte
         System.out.println(repairtype); //ntrega raparacines de transmision
 
         if (motor.toLowerCase().equals("gasolina")) {
@@ -204,7 +212,6 @@ public class RepairService {
             }
         }
         else{
-            System.out.println(total_price +"kkakakakak");
             total_price= total_price;
         }
         return total_price;
@@ -235,7 +242,7 @@ public class RepairService {
     //descuento segun marca, aun tengo dudas de este y correo blabla
     public double DescuentoSegunMarca(String patent, double total_price) {
         //descuento segun marca
-        String brand = carRepository.findByPatent(patent).getBrand();
+        String brand = getCar(patent).getBrand();
         if (brand.toLowerCase().equals("toyota")) {
             double total_price_brand = total_price * 0.1;
             total_price = total_price - total_price_brand;
@@ -268,8 +275,8 @@ public class RepairService {
     public double RecargoPorKilometraje(String patent, double total_price) {
         //recargo por kilometraje
         double total_price_km=0;
-        String type1 = carRepository.findByPatent(patent).getType();
-        int km = carRepository.findByPatent(patent).getKilometers();
+        String type1 = getCar(patent).getType();
+        int km = getCar(patent).getKilometers();
         if (type1.toLowerCase().equals("sedan")) {
             if (km <= 5000) {
                 total_price = total_price;
@@ -413,8 +420,8 @@ public class RepairService {
 
     public double recargoPorAntiguedad(String patent, double total_price) {
         //recargo por antiguedad
-        int year_car = carRepository.findByPatent(patent).getProductionYear();
-        String type1 = carRepository.findByPatent(patent).getType();
+        int year_car = getCar(patent).getProductionYear();
+        String type1 = getCar(patent).getType();
         if (type1.toLowerCase().equals("sedan")) {
             if ((2024 - year_car) <= 5) {
                 total_price = total_price;
