@@ -19,6 +19,8 @@ public class Repair {
     @Column(unique = true, nullable = false)
     private Long id; //usaremos el id para relacionarlo con los detalles
 
+    //private Long car_Id; //id del auto al que se le realizan las operaciones aun no sé
+
     //------------FECHA DE LLEGADA AL TALLER----------------
     private String admissionDateDayName; //nombre del dia de llegada
     private int admissionDateDay; //fecha de llega al taller

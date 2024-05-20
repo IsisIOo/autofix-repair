@@ -53,7 +53,6 @@ public class RepairController {
         double totalAmount = repairService.getCostbyRepair(rec);
 
         //Vamos a colocar cada uno de los componentes en el nuevo auto
-        repairHistory.setPatent(rec.getPatent());
         repairHistory.setId(rec.getId());
 
         //FECHAS CLIENTE
