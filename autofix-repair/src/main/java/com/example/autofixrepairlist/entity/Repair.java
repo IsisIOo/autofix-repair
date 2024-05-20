@@ -6,20 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-//@Table(name = "record") comentado por mientras pq el profe no lo tiene
+@Table(name = "repair")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
+//ESTE CORRESPONDE AL MICROSERVICIO 3
 public class Repair {
     //clase para el historial de reparaciones
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(unique = true, nullable = false)
-    private Long id;
-
-    //----------PATENTE DEL VEHICULO----------------
-    private String patent; //patente de letras y numeros
+    private Long id; //usaremos el id para relacionarlo con los detalles
 
     //------------FECHA DE LLEGADA AL TALLER----------------
     private String admissionDateDayName; //nombre del dia de llegada

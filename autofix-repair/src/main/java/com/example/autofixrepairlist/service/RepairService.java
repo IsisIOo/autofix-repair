@@ -1,8 +1,11 @@
 package com.example.autofixrepairlist.service;
 
 import com.example.autofixrepairlist.entity.Repair;
+import com.example.autofixrepairlist.entity.Details;
 import com.example.autofixrepairlist.model.Car;
+import com.example.autofixrepairlist.repository.DetailsRepository;
 import com.example.autofixrepairlist.repository.RepairRepository;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -15,11 +18,19 @@ public class RepairService {
     RepairRepository repairRepository;
 
     @Autowired
+    DetailsRepository detailsRepository;
+
+    @Autowired
     RestTemplate restTemplate;
 
 
     public List<Repair> getRecordRepository(){
         return (List<Repair>) repairRepository.findAll();
+    }
+
+    //segun el id entregado de reparaciones retorna los detalles de donde podemos sacar la patente y con la patente obtener el auto
+    public Details getDetailsById(Long id){
+        return detailsRepository.findByIdDetails(id);
     }
 
     public Repair getOneRecordRespository(String patent){
@@ -62,9 +73,16 @@ public class RepairService {
     //desde aqui se recibe por entrada el repository de record
     public double precioSegunReparacionyMotor(Repair rec) {
         double total_price = 0;
-        String motor = getCar(rec.getPatent()).getMotorType();
-        System.out.println(motor); //funciona y entrega diesel
-        String repairtype = rec.getRepairType(); //se debe recuperar de otra parte
+        String patente_auto = getDetailsById(rec.getId()).getPatent(); //obtiene el id de un repair. con el id de repair lo
+        // busca en details y desde details se recupera la patente y la demas info del auto
+
+        String motor = getCar(patente_auto).getMotorType();
+        System.out.println(motor);
+
+        //obtengo el id de repair, a partir de ese id hago la funcion getdetailsbyid y
+        // puedo obtener las reparaciones que se le hicieron al auto
+        String repairtype = getDetailsById(rec.getId()).getRepairType();
+
         System.out.println(repairtype); //ntrega raparacines de transmision
 
         if (motor.toLowerCase().equals("gasolina")) {
@@ -597,14 +615,16 @@ public class RepairService {
 
     //funcion donde debe entrar el historial con todo igual, solo cambiando eso
     public double getCostbyRepair(Repair rec) {
+
+        String patente = getDetailsById(rec.getId()).getPatent();
         double total_price = precioSegunReparacionyMotor(rec);
         total_price = IVATOTAL(total_price); //le saca el iva al costo original
         total_price = DescuentosSegunHora(rec, total_price);
         //total_price = DescuentoSegunMarca(patent, total_price);
         //comentada el descuento segun marca porque espero usar essa funcion como un boton
         total_price = recargoPorAtraso(rec, total_price);
-        total_price = RecargoPorKilometraje(rec.getPatent(), total_price);
-        total_price = recargoPorAntiguedad(rec.getPatent(), total_price);
+        total_price = RecargoPorKilometraje(patente, total_price);
+        total_price = recargoPorAntiguedad(patente, total_price);
         return total_price;
     }
 
