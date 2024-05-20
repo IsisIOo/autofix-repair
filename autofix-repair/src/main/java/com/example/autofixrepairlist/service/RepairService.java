@@ -63,6 +63,10 @@ public class RepairService {
     }
 
 
+    //encuentra los repositorios de un auto
+    public List<Repair> byCarId(Long carId) {
+        return repairRepository.findByCarId(carId);
+    }
 
 
 

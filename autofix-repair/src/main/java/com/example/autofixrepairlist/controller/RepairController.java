@@ -79,6 +79,12 @@ public class RepairController {
         return ResponseEntity.ok(repairHistoryNew);
     }
 
+    @GetMapping("/byCar/{}")
+    public ResponseEntity<List<Repair>> getByStudentId(@PathVariable("carId") Long carId) {
+        List<Repair> repairs = repairService.byCarId(carId);
+        return ResponseEntity.ok(repairs);
+    }
+
 
 
 

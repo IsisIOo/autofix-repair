@@ -12,4 +12,6 @@ public interface DetailsRepository extends JpaRepository<Repair, Long> {
 
     @Query(value = "SELECT * FROM details WHERE details.repair_id = :repair.id", nativeQuery = true)
     Details findByIdDetails(@Param("repair.id") Long repairId);
+
+
 }
