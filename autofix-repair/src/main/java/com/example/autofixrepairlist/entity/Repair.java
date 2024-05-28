@@ -28,10 +28,6 @@ public class Repair {
     private int admissionHour;   //hora de llegada
 
 
-    //ESTO SEGUN AHORA VA EN OTRO ARCHIVO
-    //private String repairType; //tipo de reparacion/es
-
-
     //-----------FECHAS DE SALIDA DADAS POR EL TALLER---------------
     private int departureDateDay; //fecha de salida del vehiculo
     private int departureDateMonth;

@@ -1,6 +1,7 @@
 package com.example.autofixrepairlist.controller;
 
 import com.example.autofixrepairlist.entity.Repair;
+import com.example.autofixrepairlist.service.DetailService;
 import com.example.autofixrepairlist.service.RepairService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,8 @@ import java.util.List;
 public class RepairController {
     @Autowired
     RepairService repairService;
+    @Autowired
+    DetailService detailService;
 
     //todos los weas
     @GetMapping
@@ -21,15 +24,14 @@ public class RepairController {
     public ResponseEntity<List<Repair>> getAllRepair() {
         List<Repair> recordHistory = repairService.getRecordRepository();
         return ResponseEntity.ok(recordHistory);
-
     }
 
-    @GetMapping("/{patent}")
+    /*@GetMapping("/repair-patent/{patent}")
     //recibe solo un registro
     public ResponseEntity<Repair> getOneRepairByPatent(@PathVariable String patent) {
         Repair recordHistory = repairService.getOneRecordRespository(patent);
         return ResponseEntity.ok(recordHistory);
-    }
+    }*/
 
     @PostMapping("/")
     public ResponseEntity<Repair> saveRecord(@RequestBody Repair recordHistory) {
@@ -37,7 +39,7 @@ public class RepairController {
         return ResponseEntity.ok(recordHistoryNew);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/repair-id/{id}")
     public ResponseEntity<Boolean> deleteRecordById(@PathVariable Long id) throws Exception {
         var isDeleted = repairService.deleteRecord(id);
         return ResponseEntity.noContent().build();
@@ -50,7 +52,7 @@ public class RepairController {
         Repair repairHistory = new Repair();
 
         //Conseguimos los costos para colocarlo en el auto
-        double totalAmount = repairService.getCostbyRepair(rec);
+        double totalAmount = detailService.getCostbyRepair(rec);
 
         //Vamos a colocar cada uno de los componentes en el nuevo auto
         repairHistory.setId(rec.getId());
@@ -74,6 +76,10 @@ public class RepairController {
         repairHistory.setClientHour(rec.getClientHour());
 
         repairHistory.setTotalAmount(totalAmount);
+
+        repairHistory.setTotalDiscounts();
+        repairHistory.setTotalIva();
+        repairHistory.setTotalRecharges();
 
         Repair repairHistoryNew = repairService.saveRecord(repairHistory);
         return ResponseEntity.ok(repairHistoryNew);

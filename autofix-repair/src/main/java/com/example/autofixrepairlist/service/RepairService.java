@@ -30,19 +30,20 @@ public class RepairService {
 
     //segun el id entregado de reparaciones retorna los detalles de donde podemos sacar la patente y con la patente obtener el auto
     public Details getDetailsById(Long id){
-        return detailsRepository.findByIdDetails(id);
+        return detailsRepository.findDetailsById(id);
     }
 
-    public Repair getOneRecordRespository(String patent){
-        return repairRepository.findByPatentOne(patent);
-    }
+    //public Repair getOneRecordRespository(String patent){
+    //    return repairRepository.findByPatentOne(patent);
+    //}
 
     public Repair saveRecord(Repair record){
         return repairRepository.save(record);
     }
-    public List<Repair> getRecordsByPatent(String patent) {
-        return repairRepository.findByPatent(patent);
-    }
+
+    /*public List<Repair> getRecordsByPatent(String patent) {
+        return repairRepository.findByCar_Patent(patent);
+    }*/
 
     public boolean deleteRecord(Long id) throws Exception {
         try{
@@ -58,14 +59,14 @@ public class RepairService {
 
 //REALIZA LA FUNCION OBTENER UN AUTO DE ACUERDO A UNA PATENTE ESPCIFICA, RETORNA SOLO UN AUTO
     public Car getCar(String patent) {
-        Car car = restTemplate.getForObject("http://localhost:8001/car/" + patent, Car.class);
+        Car car = restTemplate.getForObject("http://autofix-car/api/car/carpatent/" + patent, Car.class);
         return car;
     }
 
 
     //encuentra los repositorios de un auto
     public List<Repair> byCarId(Long carId) {
-        return repairRepository.findByCarId(carId);
+        return repairRepository.findRepairByCarId(carId);
     }
 
 
@@ -75,6 +76,7 @@ public class RepairService {
 
     //costo total sin descuentos!!!!!
     //desde aqui se recibe por entrada el repository de record
+    /*
     public double precioSegunReparacionyMotor(Repair rec) {
         double total_price = 0;
         String patente_auto = getDetailsById(rec.getId()).getPatent(); //obtiene el id de un repair. con el id de repair lo
@@ -238,7 +240,7 @@ public class RepairService {
         }
         return total_price;
     }
-
+*/
 
     //a este se le agrega segun hora y dia
     public double DescuentosSegunHora(Repair rec, double total_price) {
@@ -261,6 +263,7 @@ public class RepairService {
         return total_price;
     }
 
+    /*
     //descuento segun marca, aun tengo dudas de este y correo blabla
     public double DescuentoSegunMarca(String patent, double total_price) {
         //descuento segun marca
@@ -293,7 +296,7 @@ public class RepairService {
         System.out.println("Precio total de la reparación con descuento por marca: " + total_price);
         return total_price;
     }
-
+*/
     public double RecargoPorKilometraje(String patent, double total_price) {
         //recargo por kilometraje
         double total_price_km=0;
@@ -565,7 +568,7 @@ public class RepairService {
         return total_price;
     }
 
-    //total price siendo el valor original de las reparaciones aplicadas
+    /*total price siendo el valor original de las reparaciones aplicadas
     public double IVATOTAL(double total_price){
         double iva = total_price * 0.19;
         total_price = total_price + iva;
@@ -579,7 +582,7 @@ public class RepairService {
         double iva = total_price * 0.19;
         return iva;
     }
-
+*/
     public double recargoPorAtraso(Repair rec, double total_price) {
         //fechas de retiro indicadas por el taller
         int dia_retiro_taller = rec.getDepartureDateDay();
@@ -618,7 +621,7 @@ public class RepairService {
     }
 
     //funcion donde debe entrar el historial con todo igual, solo cambiando eso
-    public double getCostbyRepair(Repair rec) {
+   /*public double getCostbyRepair(Repair rec) {
 
         String patente = getDetailsById(rec.getId()).getPatent();
         double total_price = precioSegunReparacionyMotor(rec);
@@ -630,7 +633,7 @@ public class RepairService {
         total_price = RecargoPorKilometraje(patente, total_price);
         total_price = recargoPorAntiguedad(patente, total_price);
         return total_price;
-    }
+    }*/
 
 }
 
