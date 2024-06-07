@@ -8,15 +8,16 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface DetailsRepository extends JpaRepository<Repair, Long> {
+public interface DetailsRepository extends JpaRepository<Details, Long> {
 
     //encontrar todos los detalles que llega a tener una pantente
     @Query(value = "SELECT * FROM details WHERE details.patent = :patent", nativeQuery = true)
-    List<Details> findByPatentDetails(@Param("patent") String patent);
+    Details findByPatentDetails(@Param("patent") String patent);
+
+    //List<Details>
 
     //encontrar un solo detalle por id
-    @Query(value = "SELECT * FROM details WHERE details.repair_id = :repair.id", nativeQuery = true)
-    Details findDetailsById(@Param("repairId") Long repairId);
+
 
 
 

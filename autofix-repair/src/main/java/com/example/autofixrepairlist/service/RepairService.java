@@ -28,10 +28,14 @@ public class RepairService {
         return (List<Repair>) repairRepository.findAll();
     }
 
-    //segun el id entregado de reparaciones retorna los detalles de donde podemos sacar la patente y con la patente obtener el auto
-    public Details getDetailsById(Long id){
-        return detailsRepository.findDetailsById(id);
+    public Repair getOneRecordRespository(String patent){
+        return repairRepository.findByPatentOne(patent);
     }
+
+    //segun el id entregado de reparaciones retorna los detalles de donde podemos sacar la patente y con la patente obtener el auto
+   // public Details getDetailsById(Long id){
+     //   return detailsRepository.findDetailsById(id);
+    //}
 
     //public Repair getOneRecordRespository(String patent){
     //    return repairRepository.findByPatentOne(patent);

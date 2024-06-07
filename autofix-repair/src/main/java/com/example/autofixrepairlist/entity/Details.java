@@ -16,7 +16,7 @@ public class Details {
     @Column(unique = true, nullable = false)
 
     private Long id;
-    private Long repair_id; //id de repair para conectarlo con lo detalles de reparacion
+   // private Long repair_id; //id de repair para conectarlo con lo detalles de reparacion
 
     private String patent; //patente del auto
 

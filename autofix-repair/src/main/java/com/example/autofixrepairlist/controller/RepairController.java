@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/repair")
-@CrossOrigin("*")
 public class RepairController {
     @Autowired
     RepairService repairService;
@@ -19,19 +18,20 @@ public class RepairController {
     DetailService detailService;
 
     //todos los weas
-    @GetMapping
+    @GetMapping("/")
     //este obtiene todos los registros existentes
     public ResponseEntity<List<Repair>> getAllRepair() {
         List<Repair> recordHistory = repairService.getRecordRepository();
         return ResponseEntity.ok(recordHistory);
     }
 
-    /*@GetMapping("/repair-patent/{patent}")
+    //uno solo
+    @GetMapping("/repair-patent/{patent}")
     //recibe solo un registro
     public ResponseEntity<Repair> getOneRepairByPatent(@PathVariable String patent) {
         Repair recordHistory = repairService.getOneRecordRespository(patent);
         return ResponseEntity.ok(recordHistory);
-    }*/
+    }
 
     @PostMapping("/")
     public ResponseEntity<Repair> saveRecord(@RequestBody Repair recordHistory) {
@@ -45,7 +45,8 @@ public class RepairController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/newRecord/")
+    @PostMapping("/newRepair/")
+    //este necesita, las fechas los descuentos, las recargas y el iva por separado
     public ResponseEntity<Repair> updateRecord(@RequestBody Repair rec){
 
         //Creamos una nueva entidad con new
@@ -53,6 +54,15 @@ public class RepairController {
 
         //Conseguimos los costos para colocarlo en el auto
         double totalAmount = detailService.getCostbyRepair(rec);
+
+        //IVA
+        double iva = detailService.IVASOLO(totalAmount);
+
+        //recargos
+        double recargos = detailService.getCostRecharges( totalAmount, rec.getPatent());
+
+        //descuentos
+        double descuentos = detailService.DescuentosSegunHora1(rec.getPatent(), totalAmount);
 
         //Vamos a colocar cada uno de los componentes en el nuevo auto
         repairHistory.setId(rec.getId());
@@ -77,9 +87,9 @@ public class RepairController {
 
         repairHistory.setTotalAmount(totalAmount);
 
-        repairHistory.setTotalDiscounts();
-        repairHistory.setTotalIva();
-        repairHistory.setTotalRecharges();
+        repairHistory.setTotalDiscounts(descuentos);
+        repairHistory.setTotalIva(iva);
+        repairHistory.setTotalRecharges(recargos);
 
         Repair repairHistoryNew = repairService.saveRecord(repairHistory);
         return ResponseEntity.ok(repairHistoryNew);

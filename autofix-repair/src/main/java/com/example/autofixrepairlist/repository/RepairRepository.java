@@ -19,7 +19,8 @@ public interface RepairRepository extends JpaRepository<Repair, Long> {
         @Query(value = "SELECT * FROM repair WHERE car.id = :id", nativeQuery = true)
         List<Repair> findRepairByCarId(@Param("id") Long id);
 
-        @Query(value = "SELECT * FROM repair WHERE repair.id = :id", nativeQuery = true)
-        List<Repair> findRepairById(@Param("id") long id);
+
+        @Query(value = "SELECT * FROM repair WHERE repair.patent = :patent", nativeQuery = true)
+        Repair findByPatentOne(@Param("patent") String patent);
 
 }

@@ -20,6 +20,7 @@ public class Repair {
     private Long id; //usaremos el id para relacionarlo con los detalles
 
     //private Long car_Id; //id del auto al que se le realizan las operaciones aun no sé
+    private String patent;
 
     //------------FECHA DE LLEGADA AL TALLER----------------
     private String admissionDateDayName; //nombre del dia de llegada

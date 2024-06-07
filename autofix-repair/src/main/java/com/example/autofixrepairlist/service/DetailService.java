@@ -5,6 +5,7 @@ import com.example.autofixrepairlist.entity.Repair;
 import com.example.autofixrepairlist.model.Car;
 import com.example.autofixrepairlist.model.RepairList;
 import com.example.autofixrepairlist.repository.DetailsRepository;
+import com.example.autofixrepairlist.repository.RepairRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -21,14 +22,25 @@ public class DetailService {
     @Autowired
     DetailsRepository detailsRepository;
 
+    @Autowired
+    RepairRepository repairRepository;
+
+    public Details saveDetail(Details detalle){
+        return detailsRepository.save(detalle);
+    }
+
+    public Details getOneDetail(String patent){
+        return detailsRepository.findByPatentDetails(patent);
+    }
+
     public Car getCar(String patent) {
         Car car = restTemplate.getForObject("http://autofix-car/api/car/carpatent/" + patent, Car.class);
         return car;
     }
 
-    public Details getDetailsById(Long id){
-        return detailsRepository.findDetailsById(id);
-    }
+    //public Details getDetailsById(Long id){
+    //    return detailsRepository.findDetailsById(id);
+    //}
 
     public RepairList getPriceRepairs(String repair) {
         RepairList price = restTemplate.getForObject("http://autofix-list-repair/api/repair-list/by-repair/" + repair, RepairList.class);
@@ -37,7 +49,7 @@ public class DetailService {
 
     public double precioSegunReparacionyMotor(Repair rec) {
         double total_price = 0;
-        String patente_auto = getDetailsById(rec.getId()).getPatent(); //obtiene el id de un repair. con el id de repair lo
+        String patente_auto = rec.getPatent(); //obtiene el id de un repair. con el id de repair lo
         // busca en details y desde details se recupera la patente y la demas info del auto
 
         String motor = getCar(patente_auto).getMotorType();
@@ -45,7 +57,7 @@ public class DetailService {
 
         //obtengo el id de repair, a partir de ese id hago la funcion getdetailsbyid y
         // puedo obtener las reparaciones que se le hicieron al auto
-        String repairtype = getDetailsById(rec.getId()).getRepairType();
+        String repairtype = detailsRepository.findByPatentDetails(patente_auto).getRepairType();
 
         //esto es mas que nada para sacar la cantidad de reparaciones, el tamano del for
         String[] repairArray = repairtype.split(",");
@@ -444,7 +456,7 @@ public class DetailService {
     //funcion donde debe entrar el historial con todo igual, solo cambiando eso
     public double getCostbyRepair(Repair rec) {
 
-        String patente = getDetailsById(rec.getId()).getPatent();
+        String patente = rec.getPatent();
         double total_price = precioSegunReparacionyMotor(rec);
         total_price = IVATOTAL(total_price); //le saca el iva al costo original
         total_price = DescuentosSegunHora(rec, total_price);
@@ -458,18 +470,176 @@ public class DetailService {
 
 
     //cosas por separado
-    public double getCostDiscounts(double totalAmount, Repair rec){
+    public double getCostDiscounts(double totalAmount, String patent){
         double discounts = 0;
-        discounts = DescuentosSegunHora(rec, totalAmount);
+        discounts = DescuentosSegunHora1(patent, totalAmount);
         return discounts;
     }
 
-    public double getCostRecharges(double totalAmount, Repair rec){
+    public double getCostRecharges(double totalAmount, String patent){
+        //funcion para sacar los recargos por separado, que sera colocado en repair.
         double recharges = 0;
-        String patente = getDetailsById(rec.getId()).getPatent();
-        recharges = recargoPorAtraso(rec, totalAmount);
-        recharges = RecargoPorKilometraje(patente, recharges);
-        recharges = recargoPorAntiguedad(patente, recharges);
+        recharges = recargoPorAtraso1(patent, totalAmount);
+        System.out.println("recargo por atraso  1 es:" + recharges);
+        recharges = RecargoPorKilometraje1(patent, totalAmount)+ recharges;
+        System.out.println("recargo por atraso  2 es:" + recharges);
+        recharges = recargoPorAntiguedad1(patent, totalAmount) + recharges;
+        System.out.println("recargo por atraso  3 es:" + recharges);
         return recharges;
     }
+
+//---------------COSAS INDIVIDUALES-----------
+    //--------------recargos---------------
+public double recargoPorAntiguedad1(String patent, double total_price) {
+    //recargo por antiguedad
+    int year_car = getCar(patent).getProductionYear();
+    double total_price_year = 0;
+    String type1 = getCar(patent).getType();
+    if (type1.toLowerCase().equals("sedan") || type1.toLowerCase().equals("hatchback")) {
+        if ((2024 - year_car) <= 5) {
+            System.out.println("No se aplicó recargo por antiguedad bajo 5 años");
+        }
+
+        if ((2024 - year_car) >= 6 && (2024 - year_car) <= 10) {
+            total_price_year = total_price * 0.05;
+        }
+
+        if ((2024 - year_car) >= 11 && (2024 - year_car) <= 15) {
+            total_price_year = total_price * 0.09;
+        }
+
+        if ((2024 - year_car) >= 16) {
+            total_price_year = total_price * 0.15;
+        }
+    }
+
+    if (type1.toLowerCase().equals("suv") || type1.toLowerCase().equals("pickup") || type1.toLowerCase().equals("furgoneta")) {
+        if ((2024 - year_car) <= 5) {
+            System.out.println("No se aplicó recargo por antiguedad bajo 5 años");
+        }
+
+        if ((2024 - year_car) >= 6 && (2024 - year_car) <= 10) {
+            total_price_year = total_price * 0.07;
+        }
+
+        if ((2024 - year_car) >= 11 && (2024 - year_car) <= 15) {
+            total_price_year = total_price * 0.11;
+        }
+
+        if ((2024 - year_car) >= 16) {
+            total_price_year = total_price * 0.2;
+        }
+    }
+
+    System.out.println("el recargo por antiguedad es:" + total_price_year);
+    return total_price_year;
+}
+
+    public double RecargoPorKilometraje1(String patent, double total_price) {
+        //recargo por kilometraje
+        double total_price_km=0;
+        String type1 = getCar(patent).getType();
+        int km = getCar(patent).getKilometers();
+        if (type1.toLowerCase().equals("sedan") || type1.toLowerCase().equals("hatchback")) {
+            if (km <= 5000) {
+                System.out.println("No se aplicó recargo por kilometraje bajo 5000");
+            }
+            if (5001 < km && km <= 12000) {
+                total_price_km = total_price * 0.03;
+            }
+            if (12001 < km && km <= 25000) {
+                total_price_km = total_price * 0.07;
+            }
+            if (25001 < km && km <= 40000) {
+                total_price_km = total_price * 0.12;
+            }
+            if (40000 < km) {
+                total_price_km = total_price * 0.2;
+            }
+        }
+
+        if (type1.toLowerCase().equals("suv") || type1.toLowerCase().equals("pickup") || type1.toLowerCase().equals("furgoneta")) {
+            if (km < 5000) {
+                System.out.println("No se aplicó recargo por kilometraje bajo 5000 11111");
+            }
+            if (5001 < km && km < 12000) {
+                total_price_km = total_price * 0.05;
+            }
+            if (12001 < km && km < 25000) {
+                total_price_km = total_price * 0.09;
+            }
+            if (25001 < km && km < 40000) {
+                total_price_km = total_price * 0.12;
+            }
+            if (40000 < km) {
+                total_price_km = total_price * 0.2;
+            }
+        }
+
+        System.out.println("recargo km eeeesss :" + total_price_km);
+        return total_price_km;
+    }
+
+    public double recargoPorAtraso1(String patent, double total_price) {
+        double recargo_total =0;
+        //admision, pero creo que no es necesario
+        int hora_admision = repairRepository.findByPatentOne(patent).getAdmissionHour();
+        int dia_admision = repairRepository.findByPatentOne(patent).getClientDateDay();
+        int mes_admision = repairRepository.findByPatentOne(patent).getClientDateMonth();
+
+        //fechas de retiro indicadas por el taller
+        int dia_retiro_taller = repairRepository.findByPatentOne(patent).getDepartureDateDay();
+        int mes_retiro_taller = repairRepository.findByPatentOne(patent).getDepartureDateMonth();
+        int hora_retiro_taller = repairRepository.findByPatentOne(patent).getDepartureHour();
+
+        //fecha retirada por el cliente
+        int hora_retiro_cliente = repairRepository.findByPatentOne(patent).getClientHour();
+        int dia_retiro_cliente = repairRepository.findByPatentOne(patent).getClientDateDay();
+        int mes_retiro_cliente = repairRepository.findByPatentOne(patent).getClientDateMonth();
+
+        //si el retiro del cliente es mayor al retiro del taller es pq está atrasado por dias
+        if ((dia_retiro_cliente - dia_retiro_taller) > 0 && mes_retiro_cliente == mes_retiro_taller) {
+            int retraso = dia_retiro_cliente - dia_retiro_taller;
+
+            //corresponde a la cantidad de dias de retraso por 5% de cada dia que se demoro
+            recargo_total = retraso * 0.05 * total_price;
+            System.out.println("el cliente esta retrasado por " + retraso + "DIAS y su recargo es:" + recargo_total );
+            return recargo_total;
+
+        }
+        //atrasado por meses y dias
+        if ((dia_retiro_cliente - dia_retiro_taller) > 0 && (mes_retiro_cliente - mes_retiro_taller) > 0) {
+            int retraso = dia_retiro_cliente - dia_retiro_taller;
+            int retraso_meses = mes_retiro_cliente - mes_retiro_taller;
+            System.out.println("el cliente esta retrasado por " + retraso + "dias y " + retraso_meses + "meses");
+            //voy a considerar que los meses solo tienen 30 dias
+
+            //retraso de dias simples
+            double recargo_dias = retraso * 0.05 * total_price;
+            //por ejemplo, si son 3 meses de diferencia, para sacar los dias seria 3 *30 =90 dias y cada dia tiene 0.05 de recargo
+            double recargo_meses = retraso_meses * 30 * 0.05 * total_price;
+
+            recargo_total = recargo_dias + retraso_meses;
+            return recargo_total;
+        }
+        return recargo_total;
+    }
+
+    //descuentos
+    public double DescuentosSegunHora1(String patent, double total_price) {
+        // ahora veo si aplica el descuento segun la hora de ingreso
+        //agregar dia
+        double total_price_hour = 0;
+        int hour = repairRepository.findByPatentOne(patent).getAdmissionHour();//hora para determinar si se le aplica descuento por hora de llegada
+        String day = repairRepository.findByPatentOne(patent).getAdmissionDateDayName().toLowerCase();//dia para determinar si se le aplica descuento por dia de llegada
+        if (9 < hour && hour < 12 ) {//agregar que se entre lunes y jueves
+            if(day.equals("jueves")  ||  day.equals("lunes")) {
+                total_price_hour = total_price * 0.1;
+                System.out.println("El descuento aplicado por la hora: " + total_price_hour);
+                return total_price_hour;
+            }
+        }
+        return total_price_hour;
+    }
+
 }
