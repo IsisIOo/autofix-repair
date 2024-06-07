@@ -619,7 +619,7 @@ public double recargoPorAntiguedad1(String patent, double total_price) {
             //por ejemplo, si son 3 meses de diferencia, para sacar los dias seria 3 *30 =90 dias y cada dia tiene 0.05 de recargo
             double recargo_meses = retraso_meses * 30 * 0.05 * total_price;
 
-            recargo_total = recargo_dias + retraso_meses;
+            recargo_total = recargo_dias + recargo_meses;
             return recargo_total;
         }
         return recargo_total;
